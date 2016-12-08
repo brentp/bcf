@@ -13,18 +13,14 @@ import (
 
 var bcfMagic = []byte{'B', 'C', 'F'}
 
-type Header struct {
-	version [2]uint8
-	lText   uint32
-	text    []byte
-}
-
+// BCF contains the methods for reading a BCF
 type BCF struct {
 	Header Header
 	bgz    *bgzf.Reader
 	buf    []byte
 }
 
+// NewReader returns a BCF reader with the number of decompression threads.
 func NewReader(r io.Reader, rd int) (*BCF, error) {
 	bg, err := bgzf.NewReader(r, rd)
 	if err != nil {
@@ -47,13 +43,14 @@ func NewReader(r io.Reader, rd int) (*BCF, error) {
 		return nil, err
 	}
 	h.lText = binary.LittleEndian.Uint32(buf)
-	h.text = make([]byte, int(h.lText))
-	if _, err := io.ReadFull(bg, h.text); err != nil {
+	h.Text = make([]byte, int(h.lText))
+	if _, err := io.ReadFull(bg, h.Text); err != nil {
 		return nil, err
 	}
 	return &BCF{Header: h, bgz: bg, buf: buf}, nil
 }
 
+// Read returns the next variant.
 func (b *BCF) Read() (*Variant, error) {
 
 	m := make([]uint32, 8)
@@ -111,6 +108,7 @@ func (v *Variant) readBytes() []byte {
 	return val
 }
 
+// Variant represents a single variant object from the BCF.
 type Variant struct {
 	Chrom   uint32 // CHROM
 	Pos     uint32
@@ -123,16 +121,19 @@ type Variant struct {
 	shared    []byte
 	sharedOff int
 	// data after info
-	indiv    []byte
-	indivOff int
-	nallele  uint16
-	nsample  uint32
-	ninfo    uint16
-	nfmt     uint8
-	//Info     Info
+	indiv   []byte
+	nallele uint16
+	nsample uint32
+	ninfo   uint16
+	nfmt    uint8
+	info    *Info
 }
 
-func (v *Variant) unpackInfo() {
-	//v.Info = Info{}
-
+// Info returns the struct containing the INFO fields.
+func (v *Variant) Info() *Info {
+	if v.info == nil {
+		info := infoFromBytes(v.shared)
+		v.info = &info
+	}
+	return v.info
 }

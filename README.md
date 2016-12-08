@@ -2,6 +2,8 @@ bcf
 ===
 
 [![Build Status](https://travis-ci.org/brentp/bcf.svg?branch=master)](https://travis-ci.org/brentp/bcf)
+[![GoDoc] (https://godoc.org/github.com/brentp/bcf?status.png)](https://godoc.org/github.com/brentp/bcf)
+
 
 `bcf` is a [bcf](https://samtools.github.io/hts-specs/BCFv2_qref.pdf) parser for the go programming language.
 
@@ -25,6 +27,7 @@ TODO
 ====
 The library is currently working, but some things remain to be done:
 
++ parse header into proper structure
 + fix parsing of FILTER
 + finalize parsing of FORMAT fields. This is done, but we don't currently replace the missing tokens with NaN or whatever is appropriate.
 + benchmark the current INFO and FORMAT parsing (which is lazy) that saves a slice (3 uint32's) to the underlying data to compare to just saving the offsets and having each entry in the INFO pull from
