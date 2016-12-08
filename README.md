@@ -12,7 +12,7 @@ func main() {
     rdr, _ := os.Open("some.bcf")
     brdr, _ := bcf.NewReader(rdr, 2)
     for {
-        variant, err := b.Read()
+        variant, err := brdr.Read()
         if err == io.EOF {
             break
         }
