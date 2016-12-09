@@ -26,5 +26,6 @@ func TestBcf(t *testing.T) {
 			t.Fatal(err)
 		}
 		fmt.Println(string(variant.Id), variant.Chrom, variant.Pos)
+		//fmt.Println(variant.Info().Get("DP"))
 	}
 }

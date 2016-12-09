@@ -47,7 +47,8 @@ func NewReader(r io.Reader, rd int) (*BCF, error) {
 	if _, err := io.ReadFull(bg, h.Text); err != nil {
 		return nil, err
 	}
-	return &BCF{Header: h, bgz: bg, buf: buf}, nil
+	err = h.parse()
+	return &BCF{Header: h, bgz: bg, buf: buf}, err
 }
 
 // Read returns the next variant.
@@ -67,6 +68,7 @@ func (b *BCF) Read() (*Variant, error) {
 	v.ninfo = uint16(m[6] & 0xffff)
 	v.nfmt = uint8(m[7] >> 24)
 	v.nsample = uint32(m[7] & 0xffffff)
+	v.header = &b.Header
 
 	// account for the 6 additional 32bit ints in m
 	v.shared = make([]byte, m[0]-24)
@@ -84,9 +86,9 @@ func (b *BCF) Read() (*Variant, error) {
 		v.Alleles[i] = v.readBytes()
 	}
 	// TODO: fix whatever is wrong here.
-	v.sharedOff += 1
+	v.sharedOff++
 	v.filters = v.readBytes()
-	v.sharedOff += 1
+	v.sharedOff++
 
 	return &v, nil
 }
@@ -127,6 +129,7 @@ type Variant struct {
 	ninfo   uint16
 	nfmt    uint8
 	info    *Info
+	header  *Header
 }
 
 // Info returns the struct containing the INFO fields.

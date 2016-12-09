@@ -105,10 +105,24 @@ func (i infoentry) val() interface{} {
 }
 
 // Info contains the entries from the INFO field for a given Record
-// TODO: add a link to the header so we can search by key.
 type Info struct {
 	buffer
 	entries []infoentry
+	header  *Header
+}
+
+// Get the value assocated with key from the INFO field
+func (f Info) Get(key string) interface{} {
+	for i, h := range f.header.Entries {
+		if h.Id == key {
+			for _, e := range f.entries {
+				if e.headerKey == uint16(i) {
+					return e.val()
+				}
+			}
+		}
+	}
+	return nil
 }
 
 func infoFromBytes(buf []byte) Info {
